@@ -1,165 +1,119 @@
-# Odoo VPS — Auto-Deploy
+# Hayrber Odoo — Auto-Deploy
 
-Odoo 17 + PostgreSQL + GitHub webhook bilan avtomatik deploy.
+VPS'da allaqachon ishlayotgan Odoo 19 setup'iga **GitHub auto-deploy** qo'shish.
 
 ```
-[Local kod] -- git push --> [GitHub] -- webhook --> [VPS: pull + restart]
+[Lokal] -- git push --> [GitHub] -- webhook --> [VPS]
+                                                  │
+                                       git pull + rsync addons
+                                                  │
+                                          Odoo restart
 ```
 
-## Tarkibi
+## Mavjud VPS arxitekturasi
 
-| Yo'l | Tavsif |
-|------|--------|
-| `docker-compose.yml` | Odoo + Postgres konteynerlari |
-| `config/odoo.conf` | Odoo konfiguratsiyasi |
-| `addons/custom_starter/` | Boshlang'ich custom modul (namuna) |
-| `deploy/webhook.py` | GitHub webhook tinglovchi (Python stdlib) |
-| `deploy/deploy.sh` | Pull + restart skripti |
-| `deploy/odoo-webhook.service` | Webhook uchun systemd unit |
-| `deploy/setup.sh` | VPS bir martalik setup skripti |
-| `.env.example` | Muhit o'zgaruvchilari shabloni |
+| Komponent | Versiya | Joy |
+|-----------|---------|-----|
+| Odoo | 19.0 | `odoo-web-1` container |
+| PostgreSQL | 16 | `odoo-db-1` container |
+| Nginx | latest | `odoo-nginx-1` (HTTPS proxy) |
+| Certbot | latest | `odoo-certbot-1` (SSL renew) |
+| Domain | `erp.hayrber.org` | Let's Encrypt SSL |
+| Compose dir | `/root/odoo/` | docker-compose.yml |
+| Custom addons | `/root/odoo/addons/` | mounted as `/mnt/extra-addons` |
 
----
+## Repository tarkibi
 
-## 🚀 To'liq o'rnatish (3 bosqich)
-
-### Bosqich 1 — GitHub repo (1 daqiqa)
-
-1. [github.com/new](https://github.com/new) sahifasiga o'ting
-2. Yangi **private repo** yarating (masalan: `odoo-vps`)
-3. Repo URL'ni saqlang, masalan: `https://github.com/USERNAME/odoo-vps.git`
-
-### Bosqich 2 — Lokaldan birinchi push
-
-PowerShell'da loyiha papkasida:
-
-```powershell
-git init
-git branch -M main
-git add .
-git commit -m "Initial Odoo VPS setup"
-git remote add origin https://github.com/USERNAME/odoo-vps.git
-git push -u origin main
+```
+hayrber/
+├── README.md                      ← bu fayl
+├── addons/                        ← yangi custom modullaringiz shu yerga
+│   └── README.md
+└── deploy/
+    ├── setup.sh                   ← VPS bir martalik integration
+    ├── deploy.sh                  ← har push'da chaqiriladi (rsync + restart)
+    ├── webhook.py                 ← GitHub webhook listener
+    └── odoo-webhook.service       ← systemd unit
 ```
 
-### Bosqich 3 — VPS o'rnatish (5 daqiqa)
+## 🚀 O'rnatish
 
-VPS'ga SSH bilan kiring:
+### 1. VPS'ga ulaning va bitta buyruqni bajaring
 
 ```bash
 ssh root@213.199.44.110
-```
 
-Quyidagi buyruqni bajaring (URL'ni o'zingizniki bilan almashtiring):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/USERNAME/odoo-vps/main/deploy/setup.sh \
-  | bash -s -- https://github.com/USERNAME/odoo-vps.git
+curl -fsSL https://raw.githubusercontent.com/abdumajidomonov/hayrber/main/deploy/setup.sh \
+  | bash -s -- https://github.com/abdumajidomonov/hayrber.git
 ```
 
 Skript:
-- Docker o'rnatadi
-- Repo'ni `/opt/odoo-vps` ga klon qiladi
-- `.env` ni avtomatik yaratadi (xavfsiz parollar bilan)
-- Webhook xizmatini yoqadi
-- Portlarni firewall'da ochadi
-- Odoo + Postgres'ni ishga tushiradi
-- Oxirida **WEBHOOK_SECRET** ni ekranga chiqaradi — uni saqlab qoling
+- ✅ Mavjud `/root/odoo/` ni backup qiladi (`/root/odoo-backup-YYYYMMDD-HHMMSS`)
+- ✅ Repo'ni `/opt/odoo-vps/` ga klon qiladi
+- ✅ `.env` ni xavfsiz parol bilan yaratadi
+- ✅ Webhook xizmatini yoqadi (systemd)
+- ✅ Firewall'da port 9000 ni ochadi
+- ✅ **WEBHOOK_SECRET** ni ekranga chiqaradi
 
-### Bosqich 4 — GitHub webhook'ni ulash
+### 2. GitHub webhook ulash
 
-Repo'da: **Settings → Webhooks → Add webhook**
+Repo → **Settings → Webhooks → Add webhook**:
 
 | Maydon | Qiymat |
 |--------|--------|
 | Payload URL | `http://213.199.44.110:9000/` |
 | Content type | `application/json` |
-| Secret | (Bosqich 3 oxirida ko'rsatilgan) |
+| Secret | (skript bergan WEBHOOK_SECRET) |
 | Events | Just the push event |
-| Active | ✅ |
 
-**Add webhook** ni bosing. GitHub bir test "ping" yuboradi — webhook'ning yashil ✓ paydo bo'lishi kerak.
+### 3. Test
 
-### Bosqich 5 — Odoo'ga kirish
-
-Brauzerda: `http://213.199.44.110:8069`
-
-- Database yarating (master parol — `.env` da `admin_passwd` yoki Odoo ichida)
-- Admin foydalanuvchini sozlang
-- **Apps** menyusiga o'ting → "Update Apps List" → "Custom Starter" modulini topib o'rnating
-
----
-
-## 📝 Kundalik foydalanish
-
-### Yangi feature qo'shish
+Lokal kompyuteringizda:
 
 ```powershell
-# Lokalda kodni o'zgartiring (men shu yerda ishlayman)
-git add .
-git commit -m "Yangi feature qo'shildi"
-git push
+# README ga bitta belgi qo'shing
+git add . ; git commit -m "test deploy" ; git push
 ```
 
-Push'dan 5-15 soniya keyin VPS avtomatik:
-1. `git pull` qiladi
-2. `docker compose up -d` qiladi
-3. Agar `addons/` o'zgargan bo'lsa, Odoo'ni restart qiladi
-
-### Loglarni kuzatish (VPS'da)
+10-20 soniya kuting va VPS'da:
 
 ```bash
-# Webhook listener
+journalctl -u odoo-webhook -n 30 --no-pager
+```
+
+`[deploy] tugadi (OK)` yozuvini ko'rishingiz kerak.
+
+## 📦 Yangi modul yaratish
+
+1. Lokal `addons/` papkasida yangi papka yarating: `addons/my_module/`
+2. Odoo manifest va kodni yozing (`__manifest__.py`, `__init__.py`, `models/`, va h.k.)
+3. `git push`
+4. Avtomatik VPS'ga yetib boradi
+5. Odoo'da: **Apps** → "Update Apps List" → modulni o'rnating
+
+## 🛠 Foydali buyruqlar (VPS'da)
+
+```bash
+# Webhook holati
+systemctl status odoo-webhook
+
+# Webhook loglar
 journalctl -fu odoo-webhook
 
-# Odoo
-cd /opt/odoo-vps && docker compose logs -f odoo
+# Odoo loglar
+cd /root/odoo && docker compose logs -f web
 
-# Postgres
-cd /opt/odoo-vps && docker compose logs -f db
+# Qo'lda deploy
+cd /opt/odoo-vps && bash deploy/deploy.sh
+
+# Odoo restart
+cd /root/odoo && docker compose restart web
 ```
 
-### Modulni qayta yuklash
+## ⚠️ Xavfsizlik
 
-Agar XML/Python o'zgarishi UI'ga ko'rinmasa:
-
-```bash
-cd /opt/odoo-vps
-docker compose exec odoo odoo -u custom_starter -d <DB_NAME> --stop-after-init
-docker compose restart odoo
-```
-
----
-
-## 🔒 Xavfsizlik kontrol-ro'yxati
-
-- [ ] **VPS root parolini o'zgartiring** (`passwd`)
-- [ ] SSH'ni faqat kalit orqali ishlash uchun sozlang (parolni o'chiring)
-- [ ] `.env` faylini hech qachon git'ga yubormang (`.gitignore` da)
-- [ ] Webhook'ni `https://` bilan ishlatish uchun reverse proxy (nginx + Let's Encrypt) qo'shing
-- [ ] Odoo master parolni `config/odoo.conf` da kuchli qiymatga o'rnating
-- [ ] PostgreSQL portini (`5432`) tashqariga ochmang — faqat ichki tarmoqda
-
----
-
-## 🛠 Tuzatish (Troubleshooting)
-
-| Muammo | Yechim |
-|--------|--------|
-| Webhook 401 qaytaradi | Secret `.env` va GitHub'da bir xilmi tekshiring |
-| `git pull` xato | `cd /opt/odoo-vps && git status` — qo'lda fix |
-| Odoo ishlamayapti | `docker compose logs odoo` — xatoni o'qing |
-| Port band | `ss -tlnp \| grep 8069` — boshqa servis bormi |
-| Disk to'lib qoldi | `docker system prune -a --volumes` |
-
----
-
-## 🤖 Claude bilan ishlash
-
-Claude (men) bu repo'da:
-- ✅ Yangi modul yaratadi (`addons/<name>/`)
-- ✅ Mavjud kodni o'zgartiradi
-- ✅ Commit + push qiladi
-- ❌ VPS'ga to'g'ridan-to'g'ri SSH qilmaydi (xavfsizlik chegarasi)
-
-Server holatini ko'rish uchun, `ssh` bilan kirib log'larni menga nusxa qiling.
+- `.env` fayli `.gitignore`'da — hech qachon GitHub'ga yuborilmaydi
+- VPS root parolingizni **albatta o'zgartiring** (`passwd`)
+- Webhook secret tasodifiy 64 belgili hex (cryptographically secure)
+- rsync `--delete` ishlatmaydi — mavjud addonlar himoyalangan
+- Backup `/root/odoo-backup-*` joylashgan — eskisini o'chirmasdan turing

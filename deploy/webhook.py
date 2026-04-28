@@ -33,6 +33,7 @@ logging.basicConfig(
 SECRET = os.environ.get("WEBHOOK_SECRET", "").encode()
 PORT = int(os.environ.get("WEBHOOK_PORT", "9000"))
 REPO_DIR = os.environ.get("REPO_DIR", "/opt/odoo-vps")
+EXISTING_ODOO_DIR = os.environ.get("EXISTING_ODOO_DIR", "/root/odoo")
 BRANCH = os.environ.get("DEPLOY_BRANCH", "main")
 DEPLOY_SCRIPT = os.path.join(REPO_DIR, "deploy", "deploy.sh")
 
@@ -83,7 +84,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         if self.path == "/health":
-            self._send(200, {"status": "ok", "branch": BRANCH, "repo": REPO_DIR})
+            self._send(200, {
+                "status": "ok",
+                "branch": BRANCH,
+                "repo": REPO_DIR,
+                "odoo": EXISTING_ODOO_DIR,
+            })
             return
         self._send(404, {"error": "not found"})
 

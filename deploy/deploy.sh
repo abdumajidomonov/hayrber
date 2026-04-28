@@ -1,32 +1,52 @@
 #!/usr/bin/env bash
-# Deploy skripti — webhook tomonidan chaqiriladi.
-# Git'dan oxirgi o'zgarishlarni tortadi va Odoo'ni qayta ishga tushiradi.
+# Auto-deploy skripti — webhook tomonidan chaqiriladi.
+# 1. GitHub'dan oxirgi o'zgarishlarni tortadi
+# 2. addons papkasini /root/odoo/addons/ ga rsync qiladi (qo'shadi/yangilaydi, o'chirmaydi)
+# 3. Agar addons o'zgargan bo'lsa, Odoo'ni restart qiladi
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-/opt/odoo-vps}"
+EXISTING_ODOO_DIR="${EXISTING_ODOO_DIR:-/root/odoo}"
+ODOO_ADDONS="${ODOO_ADDONS:-$EXISTING_ODOO_DIR/addons}"
 BRANCH="${DEPLOY_BRANCH:-main}"
-COMPOSE="docker compose"
 
 cd "$REPO_DIR"
 
-echo "[deploy] $(date -Is) — boshlandi"
-echo "[deploy] git fetch + reset to origin/$BRANCH"
+echo "[deploy] $(date -Is) — boshlandi (branch=$BRANCH)"
+
+# Pull latest
+PREV_HEAD=$(git rev-parse HEAD)
 git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
-git clean -fd -- addons config
+NEW_HEAD=$(git rev-parse HEAD)
 
-echo "[deploy] docker compose pull"
-$COMPOSE pull
+if [ "$PREV_HEAD" = "$NEW_HEAD" ]; then
+  echo "[deploy] hech narsa o'zgarmagan ($NEW_HEAD)"
+fi
 
-echo "[deploy] docker compose up -d"
-$COMPOSE up -d --remove-orphans
+# Sync addons (qo'shadi/yangilaydi, mavjudni o'chirmaydi)
+if [ -d "$REPO_DIR/addons" ] && [ -d "$ODOO_ADDONS" ]; then
+  echo "[deploy] addons rsync: $REPO_DIR/addons/ -> $ODOO_ADDONS/"
+  rsync -av \
+    --exclude="README.md" \
+    --exclude=".gitkeep" \
+    "$REPO_DIR/addons/" \
+    "$ODOO_ADDONS/"
+  # Permissions to match other addons
+  chmod -R a+rX "$ODOO_ADDONS" 2>/dev/null || true
+fi
 
-echo "[deploy] addons yangilanyapti..."
-# Agar addons o'zgargan bo'lsa, Odoo'ni yangi modullar bilan yangilash:
-CHANGED=$(git diff --name-only HEAD@{1} HEAD -- addons/ 2>/dev/null || true)
-if [ -n "$CHANGED" ]; then
-  echo "[deploy] addons o'zgardi — Odoo restart"
-  $COMPOSE restart odoo
+# Odoo restart agar addons o'zgargan bo'lsa
+ADDONS_CHANGED=$(git diff --name-only "$PREV_HEAD" "$NEW_HEAD" -- addons/ 2>/dev/null || true)
+if [ -n "$ADDONS_CHANGED" ] || [ "$PREV_HEAD" = "$NEW_HEAD" ]; then
+  if [ -n "$ADDONS_CHANGED" ]; then
+    echo "[deploy] addons o'zgardi:"
+    echo "$ADDONS_CHANGED" | sed 's|^|         |'
+    echo "[deploy] Odoo restart qilinmoqda..."
+    cd "$EXISTING_ODOO_DIR"
+    docker compose restart web
+    echo "[deploy] Odoo restart tugadi"
+  fi
 fi
 
 echo "[deploy] $(date -Is) — tugadi (OK)"
