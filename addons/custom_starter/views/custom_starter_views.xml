@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_custom_starter_tree" model="ir.ui.view">
+        <field name="name">custom.starter.tree</field>
+        <field name="model">custom.starter</field>
+        <field name="arch" type="xml">
+            <tree string="Custom Records">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_custom_starter_form" model="ir.ui.view">
+        <field name="name">custom.starter.form</field>
+        <field name="model">custom.starter</field>
+        <field name="arch" type="xml">
+            <form string="Custom Record">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                        <field name="sequence"/>
+                    </group>
+                    <group string="Tavsif">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_custom_starter" model="ir.actions.act_window">
+        <field name="name">Custom Starter</field>
+        <field name="res_model">custom.starter</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_custom_starter_root"
+              name="Custom Starter"
+              sequence="50"/>
+    <menuitem id="menu_custom_starter_main"
+              name="Records"
+              parent="menu_custom_starter_root"
+              action="action_custom_starter"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,28 @@
+# Secrets
+.env
+*.pem
+*.key
+.credentials*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Odoo
+*.log
+filestore/
+sessions/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local artifacts
+.claude/settings.local.json
+vps_gemini.py
