@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_hayrber_hello_root"
+        name="Hayrber Hello"
+        web_icon="hayrber_hello,static/description/icon.png"
+        sequence="200"/>
+
+    <menuitem
+        id="menu_hayrber_hello_about"
+        name="✅ Auto-deploy ishlayapti!"
+        parent="menu_hayrber_hello_root"
+        action="base.action_partner_form"
+        sequence="10"/>
+</odoo>
