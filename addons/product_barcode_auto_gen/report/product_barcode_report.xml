@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_barcode_final" model="report.paperformat">
+        <field name="name">Barcode A4 Final</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_product_barcode_multi_final" model="ir.actions.report">
+        <field name="name">Barkod PDF</field>
+        <field name="model">product.barcode.wizard.final</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_barcode_auto_gen.report_barcode_final_template</field>
+        <field name="report_file">product_barcode_auto_gen.report_barcode_final_template</field>
+        <field name="paperformat_id" ref="product_barcode_auto_gen.paperformat_barcode_final"/>
+    </record>
+
+    <template id="barcode_card_snippet">
+        <!-- Tashqi konteyner -->
+        <div t-attf-style="width:{{wizard.label_width}}mm; height:{{wizard.label_height}}mm; padding:{{wizard.margin}}mm; display:inline-block; vertical-align:top; page-break-inside:avoid; box-sizing:border-box; font-size:10pt;">
+            <!-- Border div: border olib tashlandi -->
+            <div t-attf-style="width:100%; height:100%; background:white; padding:{{wizard.padding_top}}mm {{wizard.padding_right}}mm {{wizard.padding_bottom}}mm {{wizard.padding_left}}mm; box-sizing:border-box; overflow:hidden;">
+                <table style="width:100%; height:100%; border-collapse:collapse; table-layout:fixed; border:none; margin:0; padding:0;">
+                    <tr style="height: 25%;">
+                        <td style="vertical-align:middle; text-align:center; padding:0;">
+                            <div t-attf-style="font-weight:bold; font-size:{{wizard.font_size_name}}pt; color:black; line-height:{{wizard.name_line_height}}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                <t t-esc="product.name"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr style="height:1pt;">
+                        <td t-attf-style="border-top:0.5pt solid {{wizard.line_color}}; padding:0; height:1pt;"></td>
+                    </tr>
+                    <tr style="height: 45%;">
+                        <td style="vertical-align:middle; text-align:center; padding:1mm 0;">
+                            <t t-if="product.barcode">
+                                <img t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=%s&amp;width=1200&amp;height=400' % product.barcode" 
+                                     t-attf-style="height:{{wizard.barcode_height}}mm; max-width:100%; display:inline-block; vertical-align:middle;"/>
+                            </t>
+                        </td>
+                    </tr>
+                    <tr style="height:1pt;">
+                        <td t-attf-style="border-top:0.5pt solid {{wizard.line_color}}; padding:0; height:1pt;"></td>
+                    </tr>
+                    <tr style="height: 25%;">
+                        <td style="vertical-align:middle; text-align:center; padding:0;">
+                            <div t-if="product.barcode" t-attf-style="font-size:{{wizard.font_size_barcode}}pt; font-family:monospace; font-weight:bold; color:black;">
+                                <t t-esc="product.barcode"/>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_barcode_final_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="padding:0; margin:0; font-size:0; line-height:0; letter-spacing:-1px;"><t t-foreach="wizard.line_ids" t-as="line"><t t-foreach="range(line.qty)" t-as="i"><t t-call="product_barcode_auto_gen.barcode_card_snippet"><t t-set="product" t-value="line.product_id"/></t></t></t></div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

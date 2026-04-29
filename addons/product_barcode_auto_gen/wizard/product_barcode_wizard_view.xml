@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_barcode_wizard_final_form" model="ir.ui.view">
+        <field name="name">product.barcode.wizard.final.form</field>
+        <field name="model">product.barcode.wizard.final</field>
+        <field name="arch" type="xml">
+            <form string="Barkod chop etish">
+                <sheet>
+                    <div class="row">
+                        <!-- Chap tomon: Jonli ko'rinish -->
+                        <div class="col-lg-6 col-md-12 border-right" style="background: #f8f9fa; padding: 10px;">
+                            <h4 style="text-align: center; color: #666;">Jonli ko'rinish</h4>
+                            <field name="preview_html" widget="html" readonly="1" nolabel="1"/>
+                        </div>
+                        
+                        <!-- O'ng tomon: Sozlamalar -->
+                        <div class="col-lg-6 col-md-12">
+                            <notebook>
+                                <page string="O'lcham va Border">
+                                    <group>
+                                        <field name="label_width"/>
+                                        <field name="label_height"/>
+                                        <field name="border_thickness"/>
+                                        <field name="margin"/>
+                                    </group>
+                                </page>
+                                <page string="Paddinglar (mm)">
+                                    <group>
+                                        <group>
+                                            <field name="padding_top"/>
+                                            <field name="padding_left"/>
+                                        </group>
+                                        <group>
+                                            <field name="padding_bottom"/>
+                                            <field name="padding_right"/>
+                                        </group>
+                                    </group>
+                                </page>
+                                <page string="Matn va Barkod">
+                                    <group string="Mahsulot nomi">
+                                        <field name="font_size_name"/>
+                                        <field name="name_line_height"/>
+                                    </group>
+                                    <group string="Barkod">
+                                        <field name="barcode_height"/>
+                                        <field name="font_size_barcode"/>
+                                    </group>
+                                </page>
+                            </notebook>
+                        </div>
+                    </div>
+                    
+                    <separator string="Mahsulotlar"/>
+                    <field name="line_ids">
+                        <list editable="bottom" create="0">
+                            <field name="product_id" readonly="1" force_save="1"/>
+                            <field name="qty"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button name="action_print" string="Chop etish" type="object" class="btn-primary"/>
+                    <button string="Bekor qilish" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action - Bu qism mahsulotlarda tugmani chiqaradi -->
+    <record id="action_product_barcode_wizard_final_template" model="ir.actions.act_window">
+        <field name="name">Barkod chop etish</field>
+        <field name="res_model">product.barcode.wizard.final</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_product_barcode_wizard_final_product" model="ir.actions.act_window">
+        <field name="name">Barkod chop etish</field>
+        <field name="res_model">product.barcode.wizard.final</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

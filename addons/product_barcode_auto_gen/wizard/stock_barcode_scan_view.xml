@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stock_barcode_scan_line_form" model="ir.ui.view">
+        <field name="name">stock.barcode.scan.line.form</field>
+        <field name="model">stock.barcode.scan.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="uom_id" optional="show"/>
+                <field name="price_unit" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stock_barcode_scan_form" model="ir.ui.view">
+        <field name="name">stock.barcode.scan.form</field>
+        <field name="model">stock.barcode.scan</field>
+        <field name="arch" type="xml">
+            <form string="Barkod Skanerlash Stansiyasi">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>SKANER (KIRDI / CHIQDI)</h1>
+                    </div>
+                    <div class="alert alert-success" role="alert"
+                         invisible="not last_scan_info">
+                        <field name="last_scan_info" nolabel="1" readonly="1"/>
+                    </div>
+                    <group>
+                        <group string="Sozlamalar">
+                            <field name="process_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="operation_type" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <group string="Omborlar">
+                            <field name="location_id"/>
+                            <field name="location_dest_id"/>
+                        </group>
+                    </group>
+                    <group string="Skaner">
+                        <field name="barcode"
+                               placeholder="Barkodni skanerlang yoki kiriting..."
+                               default_focus="1"
+                               nolabel="1"
+                               style="font-size: 16pt; font-weight: bold;"/>
+                    </group>
+                    <notebook>
+                        <page string="Mahsulotlar ro'yxati">
+                            <field name="line_ids" widget="one2many">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="uom_id" optional="show"/>
+                                    <field name="price_unit" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group>
+                        <field name="should_print" string="Tasdiqlangach barcode chop etish"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_apply"
+                            string="TASDIQLASH va PICKING YARATISH"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not line_ids"/>
+                    <button string="BEKOR QILISH" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_barcode_scan" model="ir.actions.act_window">
+        <field name="name">Tezkor Barkod Skaner</field>
+        <field name="res_model">stock.barcode.scan</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_barcode_picking_history" model="ir.actions.act_window">
+        <field name="name">Barkod Skaner Tarixi</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('origin', 'like', 'Barkod')]</field>
+        <field name="context">{'search_default_done': 1}</field>
+    </record>
+
+    <menuitem id="menu_stock_barcode_scan"
+              name="Tezkor Barkod Skaner"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_stock_barcode_scan"
+              sequence="5"/>
+
+    <menuitem id="menu_barcode_picking_history"
+              name="Barkod Skaner Tarixi"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_barcode_picking_history"
+              sequence="6"/>
+</odoo>

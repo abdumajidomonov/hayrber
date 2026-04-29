@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_issue_barcode_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page">
+                    <t t-foreach="docs" t-as="doc">
+                        <div style="padding: 15px; text-align: center; margin: 10px; border: 2px solid #333; border-radius: 8px; page-break-inside: avoid;">
+                            <h3 style="margin: 5px 0; font-size: 14pt;">
+                                <t t-esc="doc.product_id.display_name"/>
+                            </h3>
+                            <table style="margin: 5px auto; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 2px 8px; text-align: right;"><b>Miqdor:</b></td>
+                                    <td style="padding: 2px 8px; text-align: left;">
+                                        <t t-esc="'%.2f' % doc.product_qty"/>&#160;<t t-esc="doc.uom_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px 8px; text-align: right;"><b>Transfer:</b></td>
+                                    <td style="padding: 2px 8px; text-align: left;">
+                                        <t t-esc="doc.picking_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 2px 8px; text-align: right;"><b>Sana:</b></td>
+                                    <td style="padding: 2px 8px; text-align: left;">
+                                        <t t-esc="doc.issue_date.strftime('%d.%m.%Y %H:%M') if doc.issue_date else ''"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div style="margin: 10px auto;">
+                                <img t-att-src="'/report/barcode/Code128/' + doc.barcode"
+                                     style="width: 300px; height: 70px; display: block; margin: 0 auto;"/>
+                            </div>
+                            <p style="font-size: 13pt; font-weight: bold; letter-spacing: 3px; margin: 5px 0;">
+                                <t t-esc="doc.barcode"/>
+                            </p>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

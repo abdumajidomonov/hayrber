@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Raw Materials Location -->
+        <record id="location_raw_materials" model="stock.location">
+            <field name="name">Xomashyo Ombori</field>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+            <field name="usage">internal</field>
+        </record>
+
+        <!-- Finished Goods Location -->
+        <record id="location_finished_goods" model="stock.location">
+            <field name="name">Tayyor Mahsulot Ombori</field>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+            <field name="usage">internal</field>
+        </record>
+    </data>
+</odoo>

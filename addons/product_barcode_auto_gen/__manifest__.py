@@ -1,0 +1,18 @@
+{
+    'name': "Mahsulot Chiqimi Barcode",
+    'version': '19.0.1.0.0',
+    'summary': "Ombordan chiqimda avtomatik unikal barcode generatsiyasi va chop etish",
+    'category': 'Inventory',
+    'author': 'Custom',
+    'depends': ['stock'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/sequence_data.xml',
+        'views/stock_issue_barcode_views.xml',
+        'views/stock_picking_view.xml',
+        'reports/report_action.xml',
+        'reports/report_template.xml',
+    ],
+    'installable': True,
+    'license': 'LGPL-3',
+}
