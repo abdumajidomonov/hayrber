@@ -88,13 +88,13 @@
 
     <menuitem id="menu_stock_barcode_scan"
               name="Tezkor Barkod Skaner"
-              parent="stock.menu_stock_transfers"
+              parent="stock.menu_stock_warehouse_mgmt"
               action="action_stock_barcode_scan"
               sequence="50"/>
 
     <menuitem id="menu_barcode_picking_history"
               name="Barkod Skaner Tarixi"
-              parent="stock.menu_stock_transfers"
+              parent="stock.menu_stock_warehouse_mgmt"
               action="action_barcode_picking_history"
               sequence="51"/>
 </odoo>
