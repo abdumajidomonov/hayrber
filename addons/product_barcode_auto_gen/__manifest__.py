@@ -12,6 +12,8 @@
         'views/stock_picking_view.xml',
         'reports/report_action.xml',
         'reports/report_template.xml',
+        'wizard/stock_barcode_scan_view.xml',
+        'wizard/product_barcode_wizard_view.xml',
     ],
     'installable': True,
     'license': 'LGPL-3',
