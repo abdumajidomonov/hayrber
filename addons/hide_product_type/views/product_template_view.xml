@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_hide_type_force" model="ir.ui.view">
+        <field name="name">product.template.form.hide.type.force</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- 'type' maydonini yashirish -->
+            <xpath expr="//field[@name='type']" position="replace">
+                <field name="type" invisible="1"/>
+            </xpath>
+
+            <!-- Asl nomi — nom ostida kichikroq ko'rsatish -->
+            <xpath expr="//div[hasclass('oe_title')]" position="inside">
+                <div class="o_row mt-1">
+                    <field name="x_product_real_name"
+                           nolabel="1"
+                           placeholder="Asl nomini kiriting..."
+                           style="font-size: 0.82rem; color: #888; font-style: italic; border: none; background: transparent; padding: 0;"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
