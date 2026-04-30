@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="0">
-        <!-- UZS valyuta belgisini to'g'rilash: лв → so'm -->
+        <!-- UZS valyuta belgisini to'g'rilash: лв → so'm, tiyin 0 -->
         <record id="base.UZS" model="res.currency">
             <field name="symbol">so'm</field>
+            <field name="decimal_places">0</field>
         </record>
     </data>
 </odoo>
