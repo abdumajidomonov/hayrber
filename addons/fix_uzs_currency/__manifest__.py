@@ -1,6 +1,6 @@
 {
     'name': 'Fix UZS Currency Symbol',
-    'version': '19.0.1.0',
+    'version': '19.0.1.1',
     'category': 'Custom',
     'summary': "UZS (O'zbek so'mi) valyuta belgisini to'g'rilaydi: лв → so'm",
     'author': 'Custom',
