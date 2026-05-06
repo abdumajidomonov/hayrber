@@ -145,11 +145,11 @@ class StockBarcodeScan(models.TransientModel):
         if picking.picking_type_code in ('outgoing', 'internal'):
             picking._generate_issue_barcodes_from_moves(picking.move_ids)
 
-        # Kirish ham chiqish ham: picking formiga o'tish (bir xil flow)
+        # Kirish ham chiqish ham: dialog yopib, picking formini asosiy sahifada ochish
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'stock.picking',
             'res_id': picking.id,
             'view_mode': 'form',
-            'target': 'current',
+            'target': 'main',
         }
