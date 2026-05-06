@@ -141,7 +141,7 @@ class StockBarcodeScan(models.TransientModel):
                     ml.quantity = matched_line.qty
         picking.move_ids.picked = True
 
-        # Chiqish: issue barcode yaratish + PDF yuklab picking ochish
+        # Chiqish: issue barcode yaratish → PDF yuklab delivery ochish
         if picking.picking_type_code in ('outgoing', 'internal'):
             picking._generate_issue_barcodes_from_moves(picking.move_ids)
             return {
@@ -150,9 +150,19 @@ class StockBarcodeScan(models.TransientModel):
                 'target': 'self',
             }
 
-        # Kirish: mahsulot label PDF yuklab picking ochish
+        # Kirish: barcode wizard ochiladi (miqdorlarni sozlash + chop etish)
+        # Skaner miqdorlari wizardga o'tkaziladi, foydalanuvchi boshqarishi mumkin
+        scan_quantities = {line.product_id.id: int(line.qty) for line in self.line_ids}
+        product_ids = self.line_ids.mapped('product_id').ids
         return {
-            'type': 'ir.actions.act_url',
-            'url': f'/product_barcode_auto_gen/scan_result?picking_id={picking.id}&pdf_type=product',
-            'target': 'self',
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.barcode.wizard.final',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_model': 'product.product',
+                'active_ids': product_ids,
+                'scan_picking_id': picking.id,
+                'scan_quantities': scan_quantities,
+            },
         }
