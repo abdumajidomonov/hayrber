@@ -102,7 +102,6 @@ class StockBarcodeScan(models.TransientModel):
             raise UserError(_("'Qayerdan' va 'Qayerga' omborlari bir xil bo'lmasligi kerak."))
 
         picking_type = self._find_picking_type()
-        product_names = ', '.join(l.product_id.name for l in self.line_ids)
         picking = self.env['stock.picking'].create({
             'picking_type_id': picking_type.id,
             'location_id': self.location_id.id,
@@ -155,13 +154,9 @@ class StockBarcodeScan(models.TransientModel):
             }
 
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Muvaffaqiyatli'),
-                'message': _('%d mahsulot — Transfer: %s (Tasdiqlash kutilmoqda)') % (len(self.line_ids), picking.name),
-                'type': 'success',
-                'sticky': False,
-                'next': {'type': 'ir.actions.act_window_close'},
-            },
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.picking',
+            'res_id': picking.id,
+            'view_mode': 'form',
+            'target': 'current',
         }

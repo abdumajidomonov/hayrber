@@ -8,9 +8,11 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sequence_data.xml',
+        'data/ir_sequence_data.xml',
         'data/stock_location_data.xml',
         'views/stock_issue_barcode_views.xml',
         'views/stock_picking_view.xml',
+        'report/product_barcode_report.xml',
         'reports/report_action.xml',
         'reports/report_template.xml',
         'wizard/stock_barcode_scan_view.xml',
