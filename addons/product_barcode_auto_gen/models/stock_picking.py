@@ -57,6 +57,17 @@ class StockPicking(models.Model):
             'product_barcode_auto_gen.action_report_issue_barcode'
         ).report_action(self.issue_barcode_ids)
 
+    def action_print_product_labels(self):
+        self.ensure_one()
+        product_ids = self.move_ids.mapped('product_id').ids
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.barcode.wizard.final',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'active_model': 'product.product', 'active_ids': product_ids},
+        }
+
     def action_view_issue_barcodes(self):
         self.ensure_one()
         return {

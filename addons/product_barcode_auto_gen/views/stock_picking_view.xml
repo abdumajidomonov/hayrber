@@ -20,6 +20,10 @@
                         type="object"
                         class="btn-secondary"
                         invisible="issue_barcode_count == 0"/>
+                <button name="action_print_product_labels"
+                        string="Mahsulot Labeli"
+                        type="object"
+                        class="btn-secondary"/>
             </xpath>
         </field>
     </record>

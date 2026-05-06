@@ -141,24 +141,15 @@ class StockBarcodeScan(models.TransientModel):
                     ml.quantity = matched_line.qty
         picking.move_ids.picked = True
 
-        # CHIQISH: issue barcode yaratib, picking formiga o'tish
-        # "Barcode Chiqarish" tugmasi bosilgach PDF yuklanadi, foydalanuvchi picking'da qoladi
+        # Chiqish uchun issue barcode darhol yaratish
         if picking.picking_type_code in ('outgoing', 'internal'):
             picking._generate_issue_barcodes_from_moves(picking.move_ids)
-            return {
-                'type': 'ir.actions.act_window',
-                'res_model': 'stock.picking',
-                'res_id': picking.id,
-                'view_mode': 'form',
-                'target': 'current',
-            }
 
-        # KIRISH: mahsulot label chop etish wizard ochiladi
-        product_ids = self.line_ids.mapped('product_id').ids
+        # Kirish ham chiqish ham: picking formiga o'tish (bir xil flow)
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'product.barcode.wizard.final',
+            'res_model': 'stock.picking',
+            'res_id': picking.id,
             'view_mode': 'form',
-            'target': 'new',
-            'context': {'active_model': 'product.product', 'active_ids': product_ids},
+            'target': 'current',
         }
