@@ -25,11 +25,18 @@ class StockPicking(models.Model):
         return res
 
     def _generate_issue_barcodes(self):
+        """Validate qilingan picking uchun — faqat 'done' bo'lgan movementlar."""
+        self._generate_issue_barcodes_from_moves(
+            self.move_ids.filtered(lambda m: m.state == 'done')
+        )
+
+    def _generate_issue_barcodes_from_moves(self, moves):
+        """Har qanday holatdagi movementlardan barcode generatsiya qilish."""
         IrSequence = self.env['ir.sequence']
         now = fields.Datetime.now()
         vals_list = []
-        for move in self.move_ids.filtered(lambda m: m.state == 'done'):
-            qty = sum(ml.quantity for ml in move.move_line_ids)
+        for move in moves:
+            qty = sum(ml.quantity for ml in move.move_line_ids) or move.product_uom_qty
             if not qty:
                 continue
             barcode_val = IrSequence.next_by_code('product.issue.barcode') or f"BC{self.id}{move.id}"

@@ -55,9 +55,6 @@
                             </field>
                         </page>
                     </notebook>
-                    <group>
-                        <field name="should_print" string="Tasdiqlangach barcode chop etish"/>
-                    </group>
                 </sheet>
                 <footer>
                     <button name="action_apply"

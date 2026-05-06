@@ -29,8 +29,6 @@ class StockBarcodeScan(models.TransientModel):
         ('finished', 'Tayyor mahsulot')
     ], string='Jarayon turi', default='raw', required=True)
 
-    should_print = fields.Boolean(string='Tasdiqlangach barkodni chop etish', default=False)
-
     location_id = fields.Many2one('stock.location', string='Qayerdan', domain=[('usage', '=', 'internal')])
     location_dest_id = fields.Many2one('stock.location', string='Qayerga', domain=[('usage', '=', 'internal')])
 
@@ -110,7 +108,7 @@ class StockBarcodeScan(models.TransientModel):
         })
 
         for line in self.line_ids:
-            move = self.env['stock.move'].create({
+            self.env['stock.move'].create({
                 'product_id': line.product_id.id,
                 'product_uom_qty': line.qty,
                 'product_uom': line.product_id.uom_id.id,
@@ -143,16 +141,11 @@ class StockBarcodeScan(models.TransientModel):
                     ml.quantity = matched_line.qty
         picking.move_ids.picked = True
 
-        if self.should_print:
-            product_ids = self.line_ids.mapped('product_id').ids
-            return {
-                'type': 'ir.actions.act_window',
-                'res_model': 'product.barcode.wizard.final',
-                'view_mode': 'form',
-                'target': 'new',
-                'context': {'active_model': 'product.product', 'active_ids': product_ids},
-            }
+        # Chiqim (outgoing/internal) uchun darhol unikal barcode yaratish
+        if picking.picking_type_code in ('outgoing', 'internal'):
+            picking._generate_issue_barcodes_from_moves(picking.move_ids)
 
+        # Kirsa Receipt, chiqsa Delivery — ikkalasi ham shu picking formida ochiladi
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'stock.picking',
