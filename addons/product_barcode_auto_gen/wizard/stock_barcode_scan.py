@@ -112,7 +112,6 @@ class StockBarcodeScan(models.TransientModel):
 
         for line in self.line_ids:
             move = self.env['stock.move'].create({
-                'name': line.product_id.name,
                 'product_id': line.product_id.id,
                 'product_uom_qty': line.qty,
                 'product_uom': line.product_id.uom_id.id,

@@ -8,6 +8,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sequence_data.xml',
+        'data/stock_location_data.xml',
         'views/stock_issue_barcode_views.xml',
         'views/stock_picking_view.xml',
         'reports/report_action.xml',
