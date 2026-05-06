@@ -141,15 +141,20 @@ class StockBarcodeScan(models.TransientModel):
                     ml.quantity = matched_line.qty
         picking.move_ids.picked = True
 
-        # Chiqim (outgoing/internal) uchun darhol unikal barcode yaratish
+        # CHIQISH: darhol issue barcode yaratib, PDF avtomatik yuklanadi
         if picking.picking_type_code in ('outgoing', 'internal'):
             picking._generate_issue_barcodes_from_moves(picking.move_ids)
+            if picking.issue_barcode_ids:
+                return self.env.ref(
+                    'product_barcode_auto_gen.action_report_issue_barcode'
+                ).report_action(picking.issue_barcode_ids)
 
-        # Kirsa Receipt, chiqsa Delivery — ikkalasi ham shu picking formida ochiladi
+        # KIRISH: mahsulot label wizard ochiladi (chop etish uchun)
+        product_ids = self.line_ids.mapped('product_id').ids
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'stock.picking',
-            'res_id': picking.id,
+            'res_model': 'product.barcode.wizard.final',
             'view_mode': 'form',
-            'target': 'current',
+            'target': 'new',
+            'context': {'active_model': 'product.product', 'active_ids': product_ids},
         }
